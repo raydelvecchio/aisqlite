@@ -1,6 +1,6 @@
 # AISQLite
 AI enhanced wrapper around sqlite. Can still execute your queries in sqlite fashion, but can also retrieve data via natural language queries powered by OpenAI. You can find the PyPi distribution [here](https://pypi.org/project/aisqlite/0.0.1/). Install
-with `pip install aisqlite`.
+with `pip install aisqlite`. Query with natural language via `generate_sql()` and `generated_execute_and_fetch()`.
 
 # Usage Example
 ```python
