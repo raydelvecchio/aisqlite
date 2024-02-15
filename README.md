@@ -2,14 +2,36 @@
 AI enhanced wrapper around sqlite. Can still execute your queries in sqlite fashion, but can also retrieve data via natural language queries powered by OpenAI. You can find the PyPi distribution [here](https://pypi.org/project/aisqlite/0.0.1/). Install
 with `pip install aisqlite`.
 
+# Usage Example
+```python
+from aisqlite import AISQLite
+
+db = AISQLite(dbname = "example", openai_api_key = "YOUR_API_KEY")
+
+db.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+db.execute("""
+INSERT INTO users (username, email) VALUES (?, ?)
+""", ('ray', 'ray@cerebralvalley.ai'))
+
+results = db.generated_execute_and_fetch("list all the names")
+```
+
 # Documentation
 ## Class `AISQLite`
 * `__init__`: constructor for AISQLite
     * **dbname (str)**: the database name you want to use with AISQLite. Can pass in either an existing database or name one yourself, but must end in *.db*. Will save
     this to disk.
     * **autoconnect (bool)**: if we want to connect the connection and cursor objects upon initialization. If true, will connect and initialize cursor without
-    having to do it manually.
-    * **openai_api_key (str)**: the openai API key you want to use when generating SQL. If you don't pass in an API key, you can't use the generative features.
+    having to do it manually. Default to True.
+    * **openai_api_key (str)**: the openai API key you want to use when generating SQL. If you don't pass in an API key, we try to pull the API key from environment variables. If this is not found, you can't use AI features and a warning is printed.
 * `connect`: connects the connection object and initializes cursor object as internal variables.
 * `close`: close connection and cursor objects.
 * `execute`: executes the given query and parameters. Simply executes with the cursor, but does not return any results.

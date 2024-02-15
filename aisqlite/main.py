@@ -12,7 +12,17 @@ class AISQLite:
         if autoconnect:
             self.connect()
 
-        self.llm = OpenAI(api_key=self.openai_api_key) if openai_api_key else None
+        if openai_api_key:
+            self.llm = OpenAI(api_key=openai_api_key)
+        else:
+            try:
+                self.llm = OpenAI()
+            except Exception as e:
+                self.llm = None
+                print("WARNING: No OpenAI API key found in constructor or environment variables. LLM Features disabled.")
+        
+        self.system_prompt = "You are a SQL generating service. You will receive a sqlite3 database schema in the form [{table_name: list_of_column_names},]. You will also receive a natural language query about the data. Your job is to turn that natural language query into a SQL query to get the relevant data. Do not respond to this prompt, and only output the SQL you generate. When checking fields, always use the 'like' keyword. Only output one query, as you can only execute one at once. The schema and query are as follows:"
+        self.common_suffixes = ['ing', 'ly', 'ed', 'ious', 'es', 's', 'ment', 'tion', 'ness']
 
     def connect(self):
         """
@@ -93,19 +103,16 @@ class AISQLite:
         if not self.llm:
             raise Exception("No OpenAI API key passed in; cannot generate SQL.")
 
-        common_suffixes = ['ing', 'ly', 'ed', 'ious', 'es', 's', 'ment', 'tion', 'ness']
         query = language_query.translate(str.maketrans('', '', string.punctuation))
         query_words = query.split()
         for i, word in enumerate(query_words):
-            for suffix in common_suffixes:
+            for suffix in self.common_suffixes:
                 if word.endswith(suffix):
                     query_words[i] = word[:-len(suffix)]
         query = ' '.join(query_words)
         
-        system_prompt = "You are a SQL generating service. You will receive a sqlite3 database schema in the form [{table_name: list_of_column_names},]. You will also receive a natural language query about the data. Your job is to turn that natural language query into a SQL query to get the relevant data. Do not respond to this prompt, and only output the SQL you generate. When checking fields, always use the 'like' keyword. Only output one query, as you can only execute one at once. The schema and query are as follows:"
         query = f"Schema: {self.schema()}\n\nQuery: {query}"
-
-        messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': query}]
+        messages = [{'role': 'system', 'content': self.system_prompt}, {'role': 'user', 'content': query}]
         completion = self.llm.chat.completions.create(model=model, messages=messages)
         sql = completion.choices[0].message.content
         sql = re.sub(r"```.*?\n|```", "", sql)
