@@ -34,7 +34,6 @@ AI enhanced wrapper around sqlite. Can still execute your queries in sqlite fash
     * **allow_modify (bool)**: if we want the query to modify the database or not. Good control access for the LLM. If True, we allow the query to execute even if
     it will modify the LLM. If False, it will block all modification queries and display a warning message.
 
-
 # Pip Deploy
 1. Delete existing `dist` and `build`.
 2. `python3 setup.py sdist bdist_wheel`
