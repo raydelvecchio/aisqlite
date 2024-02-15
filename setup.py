@@ -12,5 +12,6 @@ setup(
         'setuptools', 
         'twine',
         'openai',
+        'wheel',
     ],
 )
