@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 """)
 
 db.execute("""
-INSERT INTO users (username, email) VALUES (?, ?)
+INSERT INTO users (name, email) VALUES (?, ?)
 """, ('ray', 'ray@cerebralvalley.ai'))
 
 results = db.generated_execute_and_fetch("list all the names")
