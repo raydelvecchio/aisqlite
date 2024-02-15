@@ -9,5 +9,8 @@ setup(
     url='https://github.com/raydelvecchio/aisql',
     packages=find_packages(),
     install_requires=[
+        'setuptools', 
+        'twine',
+        'openai',
     ],
 )
