@@ -33,18 +33,20 @@ class AISQLite:
     
     def close(self):
         """
-        Close the SQLite3 database connection.
+        Close the SQLite3 database connection and commit any changes.
         """
-        if self.cursor:
-            self.cursor.close()
         if self.conn:
+            self.conn.commit()
+            if self.cursor:
+                self.cursor.close()
             self.conn.close()
     
     def execute(self, sql_query: str, params: tuple = ()):
         """
-        Given a query and parameters, execute the query.
+        Given a query and parameters, execute the query and commit the changes.
         """
         self.cursor.execute(sql_query, params)
+        self.conn.commit()
     
     def fetchall(self) -> list[tuple]:
         """
@@ -66,9 +68,10 @@ class AISQLite:
     
     def execute_and_fetch(self, sql_query: str, params: tuple = (), num: int = -1) -> list[tuple]:
         """
-        Execute the query and return the results. By default, return all results. However, can change this.
+        Execute the query, commit the changes, and return the results. By default, return all results. However, can change this.
         """
         self.cursor.execute(sql_query, params)
+        self.conn.commit()
         if num == -1:
             return self.fetchall()
         if num == 0:
@@ -120,7 +123,7 @@ class AISQLite:
     
     def generated_execute_and_fetch(self, language_query: str, model: str = 'gpt-4-0125-preview', num: int = -1, allow_modify: bool = False) -> [()]:
         """
-        Generate SQL from natural language and return the results. If allow_modify is True, we allow the model to modify the database.
+        Generate SQL from natural language, execute it, commit the changes, and return the results. If allow_modify is True, we allow the model to modify the database.
         """
         sql = self.generate_sql(language_query=language_query, model=model)
         modify_keywords = ['insert', 'update', 'delete', 'drop', 'create', 'add', 'truncate']  # keywords that modify data
